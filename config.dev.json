@@ -34,15 +34,15 @@
 	"timeZone": "Asia/Ho_Chi_Minh",
 	"credentials": {
 		"gmailAccount": {
-			"email": "",
-			"clientId": "",
-			"clientSecret": "",
-			"refreshToken": "",
+			"email": "hyanguep1999@gmail.com",
+			"clientId": "987698237742-1pb9m47r0clpscdipfm3sh19o8mffgjv.apps.googleusercontent.com",
+			"clientSecret": "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",
+			"refreshToken": "1//04tTbQ4nQ52oTCgYIARAAGAQSNwF-L9IrhkpXGPToLXEmFnyAoXUQFyyuOyt-PUBkUXJLVqeul9lFCnYXC_XgVXmn2u28P9nZ_7E",
 			"apiKey": ""
 		},
 		"gRecaptcha": {
-			"siteKey": "",
-			"secretKey": ""
+			"siteKey": "6Lc9QN4oAAAAAFJ-mhrDEwkzoh1bdE9vcahSvd_I",
+			"secretKey": "6Lc9QN4oAAAAAHmTFXnTCETQtfuaBtqwnnNYDZgl"
 		}
 	},
 	"dashBoard": {
