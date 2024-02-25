@@ -3,7 +3,7 @@ const { getStreamFromURL } = require("fb-watchman");
 module.exports = {
   config: {
     name: "stats",
-    aliases: ["ping","upt","time"],
+    aliases: ["ping","up","time"],
     version: "1.0",
     author: "OtinXSandip",
     role: 2,
@@ -41,7 +41,7 @@ module.exports = {
 
       const timeStart = Date.now();
       await api.sendMessage({
-        body: "wait a sec boss🫠",
+        body: "wait a sec boss🌝",
       }, event.threadID);
 
       const ping = Date.now() - timeStart;
@@ -52,7 +52,7 @@ module.exports = {
       }
 
       // Assuming global.utils.getStreamFromURL(img) is correctly defined
-      const imgURL= "https://i.ibb.co/ZgMkpVx/image.jpg";
+      const imgURL= "https://i.ibb.co/GVnkdG9/image.jpg";
       const attachment = await global.utils.getStreamFromURL(imgURL);
 
       api.sendMessage({
