@@ -1,57 +1,74 @@
 const axios = require("axios");
 const fs = require("fs-extra");
-const request = require("request");
 const path = require("path");
 
 module.exports = {
   config: {
-    name: "pinterest", 
-    aliases: ["pin",'pint'], 
-    version: "1.0.2", 
-    author: "Ncs Pro", 
+    name: "pin",
+    aliases: ["pinterest"],
+    version: "1.0.0",
+    author: "kshitiz",
     role: 0,
-    countDown: 50,
+    countDown: 10,
     shortDescription: {
-      en: "Search for images on Pinterest"
-    }, 
-    longDescription: {
-      en: ""
-    }, 
-    category: "wiki", 
+      en: "Search images on Pinterest"
+    },
+    category: "image",
     guide: {
-      en: "{prefix}pinterest <search query> -<number of images>"
+      en: "{prefix}pin <search query> -<number of images>"
     }
-  }, 
+  },
 
-  onStart: async function({ api, event, args, config }) {
+  onStart: async function ({ api, event, args, usersData }) {
     try {
-      const keySearch = args.join(" ");
-      if (!keySearch.includes("-")) {
-        return api.sendMessage(`Please enter the search query and number of images to return in the format: ${config.guide.en}`, event.threadID, event.messageID);
-      }
-      const keySearchs = keySearch.substr(0, keySearch.indexOf('-')).trim();
-      const numberSearch = parseInt(keySearch.split("-").pop().trim()) || 6;
+      const searchQuery = args.join(" ");
 
-      const res = await axios.get(`https://pinterest-41y5.onrender.com/pin?search=${encodeURIComponent(keySearchs)}`);
-      const data = res.data.data;
+   
+      if (!searchQuery.includes("-")) {
+        return api.sendMessage(`Invalid format. Example: {prefix}pin cats -5`, event.threadID, event.messageID);
+      }
+
+     
+      const [query, numImages] = searchQuery.split("-").map(str => str.trim());
+      const numberOfImages = parseInt(numImages);
+
+     
+      if (isNaN(numberOfImages) || numberOfImages <= 0 || numberOfImages > 25) {
+        return api.sendMessage("Please specify a number between 1 and 25.", event.threadID, event.messageID);
+      }
+
+   
+      const apiUrl = `https://pin-kshitiz.vercel.app/pin?search=${encodeURIComponent(query)}`;
+      const response = await axios.get(apiUrl);
+      const imageData = response.data.result;
+
+     
+      if (!imageData || !Array.isArray(imageData) || imageData.length === 0) {
+        return api.sendMessage(`No images found for "${query}".`, event.threadID, event.messageID);
+      }
+
+    
       const imgData = [];
-
-      for (let i = 0; i < Math.min(numberSearch, data.length); i++) {
-        const imgResponse = await axios.get(data[i], { responseType: 'arraybuffer' });
-        const imgPath = path.join(__dirname, 'cache', `${i + 1}.jpg`);
-        await fs.outputFile(imgPath, imgResponse.data);
-        imgData.push(fs.createReadStream(imgPath));
+      for (let i = 0; i < Math.min(numberOfImages, imageData.length); i++) {
+        const imageUrl = imageData[i];
+        try {
+          const imgResponse = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+          const imgPath = path.join(__dirname, 'cache', `${i + 1}.jpg`);
+          await fs.outputFile(imgPath, imgResponse.data);
+          imgData.push(fs.createReadStream(imgPath));
+        } catch (error) {
+          console.error(error);
+        }
       }
 
+     
       await api.sendMessage({
         attachment: imgData,
-        body: `Here are the top ${imgData.length} image results for "${keySearchs}":`
+        body: ``
       }, event.threadID, event.messageID);
-
-      await fs.remove(path.join(__dirname, 'cache'));
     } catch (error) {
       console.error(error);
-      return api.sendMessage(`please add to your keysearch -10 \n ex: pin cat -10`, event.threadID, event.messageID);
+      return api.sendMessage(`An error occurred.`, event.threadID, event.messageID);
     }
   }
 };
