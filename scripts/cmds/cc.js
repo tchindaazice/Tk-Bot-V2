@@ -15,6 +15,6 @@ module.exports = {
         message,
         getLang
     }) {
-        if (event.body && event.body.toLowerCase() == "cc") return message.reply("❤‍🔥 Comment ça va ? ❤‍🔥 tape -tkgc pour rejoindre le groupe");
+        if (event.body && event.body.toLowerCase() == "cc") return message.reply("👋 𝑪𝒐𝒎𝒎𝒆𝒏𝒕 𝒗𝒂𝒔 𝒕𝒖 𝒃𝒓𝒐 ? 𝑬́𝒄𝒓𝒊𝒕 @trollgc 𝒆𝒕 𝒋𝒆 𝒗𝒂𝒊𝒔 𝒅𝒆 𝒕𝒆́𝒍𝒆́𝒑𝒐𝒓𝒕𝒆́ 𝒗𝒆𝒓𝒔 𝒖𝒏 𝒏𝒐𝒖𝒗𝒆𝒂𝒖 𝒖𝒏𝒊𝒗𝒆𝒓𝒔 🌌");
     }
 };
