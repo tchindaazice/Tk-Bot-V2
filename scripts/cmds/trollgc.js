@@ -1,6 +1,6 @@
 module.exports = {
   config: {
-    name: "Tkgc",
+    name: "trollgc",
     version: "1.0",
     author: "SiAM",
     countDown: 30,
