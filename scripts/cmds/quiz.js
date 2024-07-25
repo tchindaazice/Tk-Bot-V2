@@ -1,19 +1,3 @@
-/*
-quiz game solo coded by Jun Jaam
-contact me: https://m.me/junzjaam
-
-read line 242 to 278 if u want to  add your own question using json
-
-go to line 333 and 429 to change reward
-
-read line 396464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464646464640 if you want to customize correct or wrong answers output
-
-don't change credit please i know making this code is not hard as you think, but adding question is really a struggle 
-
-
-konti palang sa anime at country aadd ko lang pag may free time
-*/
-
 const axios = require('axios');
 
 module.exports = {
@@ -21,484 +5,218 @@ module.exports = {
     name: "quiz",
     aliases: [],
     version: "2.0",
-    author: "Jun",//Shared By Loid Butter
-    countDown: 10,
+    author: "itz Aryan",
+    countDown: 2,
     role: 0,
-    shortDescription: {
-      vi: "",
-      en: "game to earn money and enchance your iq and compete with other players"
-    },
     longDescription: {
-      vi: "",
       en: ""
     },
     category: "games",
     guide: {
-      en: "{pn} <category>\n{pn} rank\n-view your rank\n{pn} leaderboard\n-view top players\nto submit a bug report or feedback\n\n just type:\nquizr <your message>\n"
+      en: "{pn} <category>"
     },
     envConfig: {
-      reward: 0
+      reward: 10000 // Default reward for correct answers
     }
   },
   langs: {
     en: {
-      reply: "Please reply your answer with the letter only\n=========================",
-      correct: "",
-      wrong: ""
+      reply: "⚙️ 𝗤𝘂𝗶𝘇 ( 𝖻𝖾𝗍𝖺 )\n━━━━━━━━━━━━━\n\nPlease reply with the letter corresponding to your answer\n━━━━━━━━━━━━━",
+      correctMessage: "⚙️ 𝗤𝘂𝗶𝘇 ( 𝖻𝖾𝗍𝖺 )\n━━━━━━━━━━━━━\n\n🎉 Congratulations ${userName}! You provided the correct answer and won ${reward} $.",
+      wrongMessage: "⚙️ 𝗤𝘂𝗶𝘇 ( 𝖻𝖾𝗍𝖺 )\n━━━━━━━━━━━━━\n\nOops, ${userName}, that's not quite right. Could you try again?"
     }
   },
   onStart: async function ({ message, event, usersData, commandName, getLang, args, api }) {
-const { getPrefix } = global.utils;
-//dont remove this please this is important
-const c = this.config.name;
-const f = this.config.author;
-const credit = "fuсkyа";
-//...
-  const p = getPrefix(event.threadID);
-  if (args.length === 0) {
-    message.reply(`Please add a category\nHere's the list of categories:\n==============\nenglish\nmath\nphysics\nfilipino\nbiology\nchemistry\nhistory\nphilosophy\nrandom\nscience\n\nanime, country\n-with pic\n\ntorf <true or false>\n-react only to answer\n==============\nExample usage: ${p}${c} english\n\n${p}${c} rank >> view your quiz rank\n${p}${c} leaderboard >> view the top players`);
-    return;
-  }     
-  if (args[0].toLowerCase() === "rank") {
-  try {
-    const response = await axios.get('https://api-test.yourboss12.repl.co/api/quiz/quiz/all');
-    const playerData = response.data;
-    playerData.sort((a, b) => b.correct - a.correct);
-    let rank = null;
-    for (let i = 0; i < playerData.length; i++) {
-      if (playerData[i].playerid === event.senderID) {
-        rank = i + 1;
-        break;
-      }
-    }
-    if (rank) {
-      const player = playerData[rank - 1];
-      const userData = await usersData.get(player.playerid);
-      const name = userData.name;
-      let rankMessage = `🏆Rank: ${rank}\n\n`;
-      rankMessage += `Name: ${name}\n`;
-      rankMessage += `Correct Answers: ${player.correct}\n`;
-      rankMessage += `Wrong Answers: ${player.wrong}\n`;
-      rankMessage += `Total Games: ${player.correct + player.wrong}\n`;
-      message.reply(rankMessage);
-    } else {
-      message.reply("You are not ranked yet.");
-    }
-    return;
-  } catch (error) {
-    console.log(error);
-    message.reply('Failed to fetch rank data.');
-    return;
-  }
-  }        
+    const category = args[0] ? args[0].toLowerCase() : '';
 
-         
-  if (args[0].toLowerCase() === "leaderboard") {
-  try {
-    const currentDate = new Date().toLocaleDateString('en-US', { timeZone: 'Asia/Manila' });
-    const currentTime = new Date().toLocaleTimeString('en-US', { timeZone: 'Asia/Manila' });
-
-    const response = await axios.get('https://api-test.yourboss12.repl.co/api/quiz/quiz/all');
-    const playerData = response.data;
-    playerData.sort((a, b) => b.correct - a.correct);
-    let leaderboardMessage = '│ [ 🏆 ] • Quiz Global Leaderboard \n│Quiz Started on: 7/15/2023\n│Current Date: ';
-    leaderboardMessage += `${currentDate}\n`;
-    leaderboardMessage += `│Current Time: ${currentTime}\n`;
-
-    const quizStartDate = new Date("7/15/2023");
-    const quizEndDate = new Date(currentDate);
-    const quizDuration = Math.floor((quizEndDate - quizStartDate) / (1000 * 60 * 60 * 24)) + 1;
-    leaderboardMessage += `│Quiz Running: ${quizDuration}d\n│`;
-    leaderboardMessage += '=========================\n';
-    let page = 1;
-    let pageSize = 5;
-    if (args[1] && !isNaN(args[1])) {
-      page = parseInt(args[1]);
-    }
-    const startIndex = (page - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-
-    for (let i = startIndex; i < endIndex && i < playerData.length; i++) {
-
-      
-         const player = playerData[i];
-      const userData = await usersData.get(player.playerid);
-      const playerName = userData.name;
-      
-      //this is supposed to mention player in leaderboard ☹ but got no time to fix it..
-      const arraytag = [
-        { id: player.playerid, tag: playerName },
-        { id: player.playerid, tag: playerName }
-      ];
-      const msg = {
-        body: `${playerName}`,
-        mentions: arraytag
-      };
-
-      
-      leaderboardMessage += `│Rank #${i + 1}\n│「${msg.body}」\n`;
-      leaderboardMessage += `│Correct Answers: ${player.correct}\n`;
-      leaderboardMessage += `│Wrong Answers: ${player.wrong}\n`;
-      leaderboardMessage += `│Total Games: ${player.correct + player.wrong}\n`;
-      leaderboardMessage += '╰──────────────────\n';
+    if (!['english', 'math', 'physics', 'filipino', 'biology', 'chemistry', 'history', 'philosophy', 'random', 'science', 'anime', 'country', 'torf', 'coding'].includes(category)) {
+      const { getPrefix } = global.utils;
+      const p = getPrefix(event.threadID);
+      message.reply(`⚙️ 𝗤𝘂𝗶𝘇 ( 𝖻𝖾𝗍𝖺 )\n━━━━━━━━━━━━━\n\nPlease add a valid category\nHere's the list of categories:\n\n━━━━━━━━━━━━━\n➜ english\n➜ math\n➜ physics\n➜ chemistry\n➜ history\n➜ philosophy\n➜ random\n➜ filipino\n➜ science\n➜ coding\n\n➜ anime\n-with pic\n\ntorf <true or false>\n-react only to answer\n\n━━━━━━━━━━━━━\nExample usage: ${p}${commandName} english\n🥳 Soon I will add more categories and features.`);
+      return;
     }
 
-    leaderboardMessage += `Total Players: ${playerData.length}`;
-    message.reply(`${leaderboardMessage}\nType ${p}quiz leaderboard <num> to view the next page\n\nNotes: Rank is based on Correct Answers not on Total Games`);
-    return;
-  } catch (error) {
-    console.error(error);
-    message.reply('An error occurred while retrieving the leaderboard. Please try again later.');
-    return;
-  }
-}
-        
-  //for true or false questions          
-    if (args[0].toLowerCase() === "torf") {
-      try {
-        const response = await axios.get(`https://api-test.yourboss12.repl.co/apiv2/quiz?credit=${f}‎ ${credit}`);
+    try {
+      let response;
+      if (category === 'torf') {
+        response = await axios.get(`https://beta-quiz-api.onrender.com/api/quiz?category=torf`);
         const data = response.data;
-        const junGod = {
+
+        const quizz = {
           commandName,
           author: event.senderID,
           question: data.question,
-          fuck: data.answer === "true" ? "😆" : "😮", //change reaction here
-          fvckoff: false
+          answer: data.answer === "true",
+          messageID: null, // Placeholder for message ID
+          reacted: false // Flag to track reaction
         };
 
-        const info = await message.reply(`${data.question}\n\n😆: true 😮: false`);
-        global.GoatBot.onReaction = new Map();
-        global.GoatBot.onReaction.set(info.messageID, junGod);
+        const info = await message.reply(`⚙️ 𝗤𝘂𝗶𝘇 ( 𝖻𝖾𝗍𝖺 )\n━━━━━━━━━━━━━\n\n${data.question}\n\n😆: true 😮: false`);
+        quizz.messageID = info.messageID;
+        global.GoatBot.onReaction.set(info.messageID, quizz);
 
         setTimeout(() => {
           api.unsendMessage(info.messageID);
           global.GoatBot.onReaction.delete(info.messageID);
-        }, 20000);
-      } catch (error) {
-        console.log(error);
-      }
-    } else if (args[0].toLowerCase() === "anime") { //i can actually simplify this but let's just use this method
-try {
-      const response = await axios.get(`https://api-test.yourboss12.repl.co/apiv2/aniquiz?category=anime&credit=${f}‎ ${credit}`);
-      const Qdata = response.data;
-
-      if (!Qdata || !Qdata.answer) {
-
-        return;
-      }
-
-      const text = Qdata.question;
-      const link = Qdata.link;
-const txt = "please reply your answer with this character's name\n====================\n\n";
-      message.reply({
-        body: txt + text,
-        attachment: await global.utils.getStreamFromURL(link)
-      }, (err, info) => {
-        global.GoatBot.onReply.set(info.messageID, {
-          commandName,
-          messageID: info.messageID,
-          author: event.senderID,
-          answer: Qdata.answer
-        });
-        setTimeout(() => {
-          message.unsend(info.messageID);
-          global.GoatBot.onReply.delete(info.messageID);
-        }, 30000);
-      });
-    } catch (error) {
-      console.error('Error fetching quiz data:', error);
-    }
-      } else if (args[0].toLowerCase() === "country") {
-try {
-      const response = await axios.get(`https://api-test.yourboss12.repl.co/apiv2/aniquiz?category=country&credit=${f}‎ ${credit}`);
-      const Qdata = response.data;
-
-      if (!Qdata || !Qdata.answer) {
-
-        return;
-      }
-
-      const text = Qdata.question;
-      const link = Qdata.link;
-const txt = "Guess this country's name\n======================\n\n"
-      message.reply({
-        body: txt + text,
-        attachment: await global.utils.getStreamFromURL(link)
-      }, (err, info) => {
-        global.GoatBot.onReply.set(info.messageID, {
-          commandName,
-          messageID: info.messageID,
-          author: event.senderID,
-          answer: Qdata.answer
-        });
-        setTimeout(() => {
-          message.unsend(info.messageID);
-          global.GoatBot.onReply.delete(info.messageID);
-        }, 30000);
-      });
-    } catch (error) {
-      console.error('Error fetching quiz data:', error);
-    }
-  } else/*if */ 
-      /* modify the code if you don't want to use apis question
-  
-   const category = args[0] ? args[0].toLowerCase() : '';
-  const fs = require('fs');
-
-try {
-  const quizData = JSON.parse(fs.readFileSync('quiz.json', 'utf8'));
-  if (!quizData.length) {
-    return;
-  }
-  const { question, answer } = quizData[0];
-  const text = question.split('\n')[0];
-  const choices = question.split('\n').slice(1).join('\n');
-  const body = answer;
-  message.reply({ body: `${getLang('reply')}\n\n${text}\n\n${choices}` }, (err, info) => {
-    global.GoatBot.onReply.set(info.messageID, {
-      commandName,
-      messageID: info.messageID,
-      author: event.senderID,
-      answer,
-      answered: false,
-      category,
-    });
-    setTimeout(() => {
-      const reply = global.GoatBot.onReply.get(info.messageID);
-      if (!reply.answered) {
-        message.unsend(info.messageID);
-        global.GoatBot.onReply.delete(info.messageID);
-      }
-    }, 100000);
-  });
-} catch (error) {
-  message.reply(`Sorry, there was an error getting questions for the ${category} category. Please try again later.`);
-  console.log(error);
-        }
-        } else  */ { 
-      //available category mwua
-//when i add new category to api just add it here
-      const category = args[0] ? args[0].toLowerCase() : '';
-      //you can remove some subject here
-      if (!['english','filipino', 'math', 'physics', 'chemistry', 'history', 'philosophy', 'biology', 'random', 'science'].includes(category)) {
-        message.reply(`Please add a category\nHere's the list of categories:\n==============\nenglish\nmath\nphysics\nchemistry\nhistory\nphilosophy\nrandom\nfilipino\nscience\n\nanime, country\n-with pic\n\ntorf <true or false>\n-react only to answer\n==============\nExample usage: ${p}${c} english\n\n${p}${c} rank >> view your quiz rank\n${p}${c} leaderboard >> view the top players`);
-    return;
-      }
-//api for questions
-      try {
-        const response = await axios.get(`https://api-test.yourboss12.repl.co/api/quiz/q?category=${category}&credit=${f}‎ ${credit}`);
+        }, 20000); // Message deletion timeout
+      } else if (category === 'anime') {
+        response = await axios.get(`https://beta-quiz-api.onrender.com/api/quiz?category=anime`);
         const Qdata = response.data;
-        if (!Qdata.question) {
+
+        if (!Qdata || !Qdata.photoUrl || !Qdata.animeName) {
           return;
         }
-        const text = Qdata.question.split('\n')[0];
-        const choices = Qdata.question.split('\n').slice(1).join('\n');
-        const body = Qdata.answer;
-        message.reply({ body: `${getLang('reply')}\n\n${text}\n\n${choices}` }, (err, info) => {
+
+        const imageUrl = Qdata.photoUrl;
+        const characterName = Qdata.animeName;
+
+        message.reply({
+          attachment: await global.utils.getStreamFromURL(imageUrl),
+          body: `⚙️ 𝗤𝘂𝗶𝘇 ( 𝖻𝖾𝗍𝖺 )\n━━━━━━━━━━━━━\n\nPlease reply with the character's name from the anime.`
+        }, async (err, info) => {
           global.GoatBot.onReply.set(info.messageID, {
             commandName,
             messageID: info.messageID,
             author: event.senderID,
-            answer: Qdata.answer,
+            answer: characterName,
             answered: false,
             category,
           });
+
           setTimeout(() => {
-            const Reply = global.GoatBot.onReply.get(info.messageID);
-            if (!Reply.answered) {
+            const reply = global.GoatBot.onReply.get(info.messageID);
+            if (!reply.answered) {
               message.unsend(info.messageID);
               global.GoatBot.onReply.delete(info.messageID);
             }
-          }, 100000);
+          }, 30000); // Adjust timeout as needed
         });
-      } catch (error) {
-        message.reply(`Sorry, there was an error getting questions for the ${category} category. Please try again later.`);
-        console.log(error);
+      } else {
+        response = await axios.get(`https://beta-quiz-api.onrender.com/api/quiz?category=${category}`);
+        const Qdata = response.data;
+
+        if (!Qdata || !Qdata.answer) {
+          return;
+        }
+
+        const { question, options, answer } = Qdata;
+
+        // Format options with letters (A, B, C, D)
+        const formattedOptions = options.map((opt, index) => `${String.fromCharCode(65 + index)}. ${opt}`).join('\n');
+        const correctAnswerIndex = options.findIndex(opt => opt.toLowerCase() === answer.toLowerCase());
+        const correctAnswerLetter = String.fromCharCode(65 + correctAnswerIndex);
+
+        message.reply({ body: `${getLang('reply')}\n\n${question}\n\n${formattedOptions}` }, async (err, info) => {
+          global.GoatBot.onReply.set(info.messageID, {
+            commandName,
+            messageID: info.messageID,
+            author: event.senderID,
+            answer: correctAnswerLetter,
+            options: options,
+            answered: false,
+            category,
+          });
+
+          setTimeout(() => {
+            const reply = global.GoatBot.onReply.get(info.messageID);
+            if (!reply.answered) {
+              message.unsend(info.messageID);
+              global.GoatBot.onReply.delete(info.messageID);
+            }
+          }, 100000); // Adjust timeout as needed
+        });
       }
-}
-},
 
-  
-  onReply: async function ({ message, Reply, event, api, usersData, envCommands, commandName }) {
-    const { author, messageID, answer, answered, category } = Reply;
-
-    //only the sender can asnwer it
-    if (answered || author != event.senderID) {
-      message.reply("⚠️You are not the player of this question!");
-      return;
+    } catch (error) {
+      message.reply(`⚙️ 𝗤𝘂𝗶𝘇 ( 𝖻𝖾𝗍𝖺 )\n━━━━━━━━━━━━━\n\nSorry, there was an error getting questions for the ${category} category. Please try again later.`);
+      console.error('Error fetching quiz data:', error);
     }
+  },
 
-const userData = await usersData.get(event.senderID);
+  onReply: async function ({ message, event, Reply, api, usersData, envConfig, getLang }) {
+    try {
+      const { author, messageID, answer, options, answered, category } = Reply;
 
-    const reward = 50000; //change reward here for correct answers
+      // Check if the reply is from the sender and hasn't been answered yet
+      if (answered || author !== event.senderID) {
+        message.reply("⚙️ 𝗤𝘂𝗶𝘇 ( 𝖻𝖾𝗍𝖺 )\n━━━━━━━━━━━━━\n\n⚠ You are not the player of this question!");
+        return;
+      }
 
-    const id = event.senderID;
-    const name = (await usersData.get(id)).name;
-    const arraytag = [
-      { id: event.senderID, tag: name },
-      { id: id, tag: name }
-    ];
+      const reward = envConfig?.reward || 10000; // Default reward, safely access reward
 
-    if (formatText(event.body) == formatText(answer)) {
-      global.GoatBot.onReply.delete(messageID);
-      message.unsend(event.messageReply.messageID);
-userData.money += reward;
-      await usersData.set(event.senderID, userData);
+      const userInfo = await api.getUserInfo(event.senderID);
+      const userName = userInfo[event.senderID].name;
 
-//for storing players score for correct answer, dont edit this please
+      // Check if the provided answer matches the correct answer letter
+      if (formatText(event.body) === formatText(answer)) {
+        global.GoatBot.onReply.delete(messageID);
+        message.unsend(event.messageReply.messageID);
 
-const playerid = event.senderID;
-      const correctorwrong = 'correct';
-      const apiUrl = `https://api-test.yourboss12.repl.co/api/quiz/quiz?playerid=${playerid}&correctorwrong=${correctorwrong}`;
-      axios.get(apiUrl)
-        .then(response => {
-          console.log(response.data);
-        })
-        .catch(error =>{
-          console.log(error);
-        });     
-    const response = await axios.get('https://api-test.yourboss12.repl.co/correct');
-    const imCreditChanger = response.data;
+        // Update user's money
+        const userData = await usersData.get(event.senderID);
+        userData.money += reward;
+        await usersData.set(event.senderID, userData);
 
-      
-      const rd = Math.floor(Math.random() * imCreditChanger.length);
-      const ran = imCreditChanger[rd];
+        // Send correct answer message
+        const correctMessage = getLang('correctMessage')
+          .replace('${userName}', userName)
+          .replace('${reward}', reward);
+        message.reply(correctMessage);
+      } else {
+        // Send wrong answer message
+        const wrongMessage = getLang('wrongMessage')
+          .replace('${userName}', userName);
+        message.reply(wrongMessage);
 
-      const msg = {
-        body: ran.replace('{name}', name).replace('${reward}', reward),
-        mentions: arraytag
-      };
+        // Mark question as answered to prevent multiple responses
+        global.GoatBot.onReply.set(messageID, { ...Reply, answered: true });
+      }
+    } catch (error) {
+      console.error('Error in onReply:', error);
+    }
+  },
 
- api.sendMessage(msg, event.threadID, event.messageID);
-    } else {
-      global.GoatBot.onReply.delete(messageID);
-      message.unsend(event.messageReply.messageID);
+  onReaction: async function ({ message, event, Reaction, api, usersData }) {
+    try {
+      const { author, question, answer, messageID, reacted } = Reaction;
 
-//for storing players score for wrong answer, dont edit this please
+      // Ensure the reaction is from the author and hasn't been reacted to yet
+      if (event.userID !== author || reacted) return;
 
-const playerid = event.senderID;
-      const correctorwrong = 'wrong';
-      const apiUrl = `https://api-test.yourboss12.repl.co/api/quiz/quiz?playerid=${playerid}&correctorwrong=${correctorwrong}`;
-      axios.get(apiUrl)
-        .then(response => {
-          console.log(response.data);
-        })
-        .catch(error =>{
-          console.log(error);
-        });    
+      const reward = 10000; // Default reward for correct answer in torf category
 
-/*
-this apis purpose (made by jun jaam) is when someone make a correct answers then it will send a random congratulations message
+      const userInfo = await api.getUserInfo(event.userID);
+      const userName = userInfo[event.userID].name;
 
-you modify it by removing that api and replacing this
+      // Determine if the reaction is correct based on the emoji
+      const isCorrect = (event.reaction === '😆' && answer === true) || (event.reaction === '😮' && answer === false);
 
-const imProChangingAuthor = JSON.parse(fs.readFileSync('correct.js', 'utf-8'));
+      if (isCorrect) {
+        global.GoatBot.onReaction.delete(messageID);
 
-then the correct.json will be like this
-[
-"congrats bro {name}, noise answer here's your reward ${reward}"
-//add more
-]
+        // Update user's money
+        const userData = await usersData.get(event.userID);
+        userData.money += reward;
+        await usersData.set(event.userID, userData);
 
-*/
- 
-const response = await axios.get('https://api-test.yourboss12.repl.co/wrong');
-    const creditt = response.data;
+        // Send correct answer message
+        api.sendMessage(`⚙️ 𝗤𝘂𝗶𝘇 ( 𝖻𝖾𝗍𝖺 )\n━━━━━━━━━━━━━\n\n🎉 Congratulations ${userName}! You provided the correct answer and won ${reward} $.`, event.threadID, event.messageID);
+      } else {
+        // Send wrong answer message
+        api.sendMessage(`⚙️ 𝗤𝘂𝗶𝘇 ( 𝖻𝖾𝗍𝖺 )\n━━━━━━━━━━━━━\n\nOops, ${userName}, that's not quite right. Could you try again?`, event.threadID, event.messageID);
 
-const junn = Math.floor(Math.random() * creditt.length);
-      const rn = creditt[junn];
-
-      const msg2 = {
-        body: rn.replace('{name}',name),
-        mentions: arraytag
-      };
-
-      api.sendMessage(msg2, event.threadID, event.messageID);
-    }          
-},
-
-
-  onReaction: async function ({ message, threadsData, event, Reaction, api, usersData }) {
-    const { author, question, fuck, fvckoff } = Reaction;
-
-      if (event.userID !== author || fvckoff) return;
-
-    const userData = await usersData.get(event.userID);
-
-   
-  const reward = 10000;  /*
-    const rewards = ["10000", "20000", "15000", "25000"];
-const rw = Math.floor(Math.random() * rewards.length);
-const reward = rewards[rw];
-*/
-    
-    
-    const id = event.userID;
-    const name = (await usersData.get(id)).name;
-    const arraytag = [
-      { id: event.userID, tag: name },
-      { id: id, tag: name }
-    ];
-
-    const fakyu = event.reaction;
-    const answer = fuck;
-
-    if (answer === fakyu) {
-      userData.money += reward;
-      await usersData.set(event.userID, userData);  
-const playerid = event.userID;
-      const correctorwrong = 'correct';
-      const apiUrl = `https://api-test.yourboss12.repl.co/api/quiz/quiz?playerid=${playerid}&correctorwrong=${correctorwrong}`;
-      axios.get(apiUrl)
-        .then(response => {
-          console.log(response.data);
-        })
-        .catch(error =>{
-          console.log(error);
-        });       
-    const response = await axios.get('https://api-test.yourboss12.repl.co/correct');
-    const imCreditChanger = response.data;
-
-
-      const rd = Math.floor(Math.random() * imCreditChanger.length);
-      const ran = imCreditChanger[rd];
-
-      const msg = {
-        body: ran.replace('{name}', name).replace('${reward}', reward),
-        mentions: arraytag
-      };
-
-      api.sendMessage(msg, event.threadID, event.messageID);
-    } else {
-//api for player data scores
-const playerid = event.userID;
-      const correctorwrong = 'wrong';
-      const apiUrl = `https://api-test.yourboss12.repl.co/api/quiz/quiz?playerid=${playerid}&correctorwrong=${correctorwrong}`;
-      axios.get(apiUrl)
-        .then(response => {
-          console.log(response.data);
-        })
-        .catch(error =>{
-          console.log(error);
-        });     
-      //response when wrong answr
-const response = await axios.get('https://api-test.yourboss12.repl.co/wrong');
-    const creditt = response.data;
-
-const junn = Math.floor(Math.random() * creditt.length);
-      const rn = creditt[junn]; 
-
-      const msg2 = {
-        body: rn.replace('{name}',name),
-        mentions: arraytag
-      };
-
-      api.sendMessage(msg2, event.threadID, event.messageID);
-    };
-  
-Reaction.fvckoff = true;
+        // Mark question as reacted
+        global.GoatBot.onReaction.set(messageID, { ...Reaction, reacted: true });
+      }
+    } catch (error) {
+      console.error('Error in onReaction:', error);
+    }
   }
 };
+
 function formatText(text) {
-  return text.normalize("NFD").toLowerCase();
-  }
+  return text.trim().toLowerCase();
+}
+
+module.exports.formatText = formatText;
